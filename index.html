@@ -1,0 +1,73 @@
+<html>
+    <head>
+        <title>ZEOS Fractal</title>
+    </head>
+    <body>
+        <h3>Next Event: <div id="countdown">loading...</div></h3>
+        <p>Check console output as well as the code: <a href="https://github.com/mschoenebeck/zeos1fractal">Contract</a> and <a href="https://github.com/mschoenebeck/zeos1fractal-ui">UI</a></p>
+        <script>
+            async function getInfo()
+            {
+                res = await fetch('https://kylin.eosn.io/v1/chain/get_info', {
+                    method: 'POST',
+                    mode: 'cors'
+                });
+                var resJson = await res.json();
+                //console.log(resJson);
+                return resJson;
+            }
+            async function getGlobal()
+            {
+                res = await fetch('https://kylin.eosn.io/v1/chain/get_table_rows', {
+                    method: 'POST',
+                    mode: 'cors',
+                    body: JSON.stringify({
+                        code: 'zeos1fractal',
+                        table: 'global',
+                        scope: 'zeos1fractal',
+                        json: true
+                    })
+                });
+                var resJson = await res.json();
+                //console.log(resJson);
+                return resJson.rows[0];
+            }
+            getInfo().then((info) => {
+                getGlobal().then((global) => {
+                    console.log(info);
+                    console.log(global);
+
+                    // number of blocks from current block until event block height
+                    var num_blocks = global.next_event_block_height - info.head_block_num;
+                    var countDownDate = new Date(info.head_block_time);
+                    countDownDate.setSeconds(countDownDate.getSeconds() + num_blocks / 2);
+                    
+                    // Update the count down every 1 second
+                    var x = setInterval(function() {
+
+                    // Get today's date and time
+                    var now = new Date().getTime();
+
+                    // Find the distance between now and the count down date
+                    var distance = countDownDate.getTime() - now;
+
+                    // Time calculations for days, hours, minutes and seconds
+                    var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                    var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                    // Display the result in the element with id="demo"
+                    document.getElementById("countdown").innerHTML = days + "d " + hours + "h "
+                    + minutes + "m " + seconds + "s ";
+
+                    // If the count down is finished, write some text
+                    if (distance < 0) {
+                        //clearInterval(x);
+                    }
+                    }, 1000);
+                });
+            })
+        </script>
+    </body>
+</html>
